@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cada Oveja con su Pareja - Juego de Memoria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            gap: 10px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #00bcd4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        const gameContainer = document.getElementById("game-container");
+        let cards = [];
+        let flippedCards = [];
+        let cardContent = [
+            "🐶", "🐱", "🐭", "🐹",
+            "🦊", "🐻", "🐨", "🐯"
+        ];
+
+        // Duplicar las cartas para que haya dos de cada tipo
+        cardContent = [...cardContent, ...cardContent];
+
+        // Mezclar las cartas
+        shuffle(cardContent);
+
+        // Crear las cartas y agregarlas al juego
+        cardContent.forEach((content, index) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.dataset.content = content;
+            card.textContent = "?";
+
+            card.addEventListener("click", () => {
+                flipCard(card);
+            });
+
+            cards.push(card);
+        });
+
+        // Agregar las cartas al juego
+        cards.forEach((card) => {
+            gameContainer.appendChild(card);
+        });
+
+        // Función para mezclar el contenido de las cartas
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Función para voltear una carta
+        function flipCard(card) {
+            if (flippedCards.length >= 2 || card.classList.contains("flipped")) {
+                return;
+            }
+
+            card.classList.add("flipped");
+            card.textContent = card.dataset.content;
+
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                const [firstCard, secondCard] = flippedCards;
+
+                if (firstCard.dataset.content === secondCard.dataset.content) {
+                    // Cartas emparejadas
+                    flippedCards = [];
+
+                    // Verificar si se han emparejado todas las cartas
+                    const allMatched = cards.every((card) => card.classList.contains("flipped"));
+                    if (allMatched) {
+                        setTimeout(() => {
+                            alert("¡Has ganado el juego!");
+                            resetGame();
+                        }, 500);
+                    }
+                } else {
+                    // Cartas no emparejadas
+                    setTimeout(() => {
+                        flippedCards.forEach((card) => {
+                            card.classList.remove("flipped");
+                            card.textContent = "?";
+                        });
+                        flippedCards = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        // Función para reiniciar el juego
+        function resetGame() {
+            cards.forEach((card) => {
+                card.classList.remove("flipped");
+                card.textContent = "?";
+            });
+
+            // Mezclar las cartas nuevamente
+            shuffle(cardContent);
+        }
+    </script>
+</body>
+</html>
